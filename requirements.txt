@@ -1,5 +1,4 @@
-opencv-contrib-python
-opencv-python
+opencv-contrib-python-headless==4.8.0.76
 numpy
 matplotlib
 plotly
