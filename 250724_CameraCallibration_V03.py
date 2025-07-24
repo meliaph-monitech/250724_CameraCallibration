@@ -12,8 +12,8 @@ from pathlib import Path
 # Defer cv2 import to avoid Streamlit Cloud issues
 try:
     import cv2
-except ImportError:
-    st.error("OpenCV could not be imported. Check requirements.txt and use opencv-contrib-python-headless==4.8.1.78")
+except Exception as e:
+    st.error(f"OpenCV import failed: {e}")
     st.stop()
 
 # Title
