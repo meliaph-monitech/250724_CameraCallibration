@@ -162,10 +162,12 @@ if zip_file:
                 "distortion_coefficients": dist_coeffs.tolist(),
                 "distortion_model": distortion_model
             }
-            json_path = temp_dir / f"calibration_{camera_model}_{camera_serial}.json"
-            with open(json_path, "w") as f:
-                json.dump(output, f, indent=2)
-            st.success(f"Calibration exported to: {json_path}")
+            json_data = json.dumps(output, indent=2)
+            st.download_button(label="Download Calibration JSON",
+                               data=json_data,
+                               file_name=f"calibration_{camera_model}_{camera_serial}.json",
+                               mime="application/json")
+
 
     else:
         st.warning("Not enough valid CharuCo detections for calibration (need at least 5 images with 4+ corners)")
