@@ -2,14 +2,19 @@ import streamlit as st
 import zipfile
 import os
 import io
-import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import json
 import plotly.express as px
 from PIL import Image
-from mpl_toolkits.mplot3d import Axes3D
 from pathlib import Path
+
+# Defer cv2 import to avoid Streamlit Cloud issues
+try:
+    import cv2
+except ImportError:
+    st.error("OpenCV could not be imported. Check requirements.txt and use opencv-contrib-python-headless==4.8.1.78")
+    st.stop()
 
 # Title
 st.title("Camera Calibration with CharuCo Board")
@@ -37,7 +42,6 @@ ok_threshold = st.sidebar.number_input("OK Threshold (corners)", min_value=5, va
 
 # ZIP Upload
 zip_file = st.sidebar.file_uploader("Upload ZIP of Calibration Images", type="zip")
-
 show_analysis = st.sidebar.button("Show Analysis")
 
 if zip_file:
@@ -54,6 +58,10 @@ if zip_file:
 
     image_paths = sorted(list(temp_dir.glob("*.jpg")) + list(temp_dir.glob("*.png")) + list(temp_dir.glob("*.jpeg")))
 
+    if len(image_paths) == 0:
+        st.warning("No valid image files found in ZIP.")
+        st.stop()
+
     st.subheader("Image Preview")
     st.image(str(image_paths[0]), caption="Sample Image", use_column_width=True)
 
@@ -64,12 +72,10 @@ if zip_file:
     all_corners = []
     all_ids = []
     img_size = None
-    projection_errors = []
 
     for img_path in image_paths:
         img = cv2.imread(str(img_path))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
         corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict)
 
         if len(corners) > 0:
@@ -98,7 +104,6 @@ if zip_file:
         st.markdown("**Image Size:**")
         st.code(f"{img_size}")
 
-        # Grid Analysis
         if show_analysis:
             grid_x = np.linspace(0, img_size[0], grid_size)
             grid_y = np.linspace(0, img_size[1], grid_size)
@@ -130,14 +135,13 @@ if zip_file:
                     if retval:
                         proj_pts, _ = cv2.projectPoints(board.chessboardCorners[ch_ids.flatten()], rvec, tvec, camera_matrix, dist_coeffs)
                         errors = np.linalg.norm(proj_pts.squeeze() - ch_corners.squeeze(), axis=1)
+
                         fig_err = px.scatter(x=ch_corners.squeeze()[:, 0], y=ch_corners.squeeze()[:, 1],
                                              color=errors, color_continuous_scale='Viridis',
                                              labels={'x': 'X', 'y': 'Y', 'color': 'Reprojection Error'},
                                              title='Reprojection Error per Corner')
                         st.plotly_chart(fig_err)
 
-                        # 3D reprojection plot
-                        st.subheader("3D Visualization of Reprojection Errors")
                         fig3d = px.scatter_3d(x=ch_corners.squeeze()[:, 0],
                                               y=ch_corners.squeeze()[:, 1],
                                               z=errors,
