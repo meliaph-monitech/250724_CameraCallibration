@@ -1,7 +1,6 @@
-streamlit
-opencv-python
-opencv-contrib-python
+opencv-contrib-python-headless==4.8.1.78
 numpy
 matplotlib
 plotly
 Pillow
+streamlit
