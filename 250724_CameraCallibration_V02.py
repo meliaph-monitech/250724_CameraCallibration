@@ -22,10 +22,10 @@ zip_file = st.sidebar.file_uploader("Upload a ZIP of CharuCo images", type=["zip
 
 st.sidebar.title("📐 Board Settings")
 dict_option = st.sidebar.selectbox("ArUco Dictionary", ["DICT_5X5_100", "DICT_4X4_100"])
-squares_x = st.sidebar.number_input("Number of Squares (X - columns)", min_value=2, value=5)
-squares_y = st.sidebar.number_input("Number of Squares (Y - rows)", min_value=2, value=7)
-square_len = st.sidebar.number_input("Square Length (mm)", min_value=1.0, value=25.0)
-marker_len = st.sidebar.number_input("Marker Length (mm)", min_value=1.0, value=20.0)
+squares_x = st.sidebar.number_input("Number of Squares (X - columns)", min_value=2, value=24)
+squares_y = st.sidebar.number_input("Number of Squares (Y - rows)", min_value=2, value=17)
+square_len = st.sidebar.number_input("Square Length (mm)", min_value=1.0, value=30.0)
+marker_len = st.sidebar.number_input("Marker Length (mm)", min_value=1.0, value=22.0)
 
 # --- Main Display ---
 st.title("🔧 CharuCo Camera Calibration App")
