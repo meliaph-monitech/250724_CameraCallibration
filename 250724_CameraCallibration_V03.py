@@ -10,11 +10,19 @@ from PIL import Image
 from pathlib import Path
 
 # Defer cv2 import to avoid Streamlit Cloud issues
+# try:
+#     import cv2
+# except Exception as e:
+#     st.error(f"OpenCV import failed: {e}")
+#     st.stop()
 try:
     import cv2
+    from cv2 import aruco
+    assert hasattr(cv2.aruco, "CharucoBoard_create"), "CharucoBoard_create not available"
 except Exception as e:
-    st.error(f"OpenCV import failed: {e}")
+    st.error(f"OpenCV ArUco module is not available: {e}")
     st.stop()
+
 
 # Title
 st.title("Camera Calibration with CharuCo Board")
