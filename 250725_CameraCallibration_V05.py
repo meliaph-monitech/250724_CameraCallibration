@@ -143,6 +143,38 @@ if zip_file:
             ax3d.set_zlabel("Reproj Error (L2)")
             st.pyplot(fig3d)
 
+            # --- Extrinsics Visualization (Axes Overlay) ---
+            st.subheader("🧭 Extrinsics Visualization (Axes Overlay)")
+            
+            selected_extrinsic_img = st.selectbox("Choose Image for Extrinsic Axes", [os.path.basename(p) for p in valid_images])
+            extrinsic_idx = [os.path.basename(p) for p in valid_images].index(selected_extrinsic_img)
+            
+            # Reload image
+            image = cv2.imread(valid_images[extrinsic_idx])
+            image_axes = image.copy()
+            
+            # Define 3D axes (X: red, Y: green, Z: blue)
+            axis_length = square_length * 0.5  # half square size
+            axis_3d = np.float32([[axis_length,0,0], [0,axis_length,0], [0,0,-axis_length]]).reshape(-1,3)
+            
+            # Find the center of the CharuCo board for origin placement
+            corner = all_corners[extrinsic_idx][0]
+            origin_2d, _ = cv2.projectPoints(np.zeros((1,3)), rvecs[extrinsic_idx], tvecs[extrinsic_idx], camera_matrix, dist_coeffs)
+            axes_2d, _ = cv2.projectPoints(axis_3d, rvecs[extrinsic_idx], tvecs[extrinsic_idx], camera_matrix, dist_coeffs)
+            
+            corner = tuple(origin_2d[0].ravel().astype(int))
+            x_axis = tuple(axes_2d[0].ravel().astype(int))
+            y_axis = tuple(axes_2d[1].ravel().astype(int))
+            z_axis = tuple(axes_2d[2].ravel().astype(int))
+            
+            cv2.line(image_axes, corner, x_axis, (0,0,255), 3)  # X - Red
+            cv2.line(image_axes, corner, y_axis, (0,255,0), 3)  # Y - Green
+            cv2.line(image_axes, corner, z_axis, (255,0,0), 3)  # Z - Blue
+            cv2.circle(image_axes, corner, 5, (255,255,255), -1)
+            
+            st.image(image_axes, caption="Extrinsics Axes Visualization", use_column_width=True)
+
+
             # --- Export Calibration ---
             if st.button("📁 Export Calibration JSON"):
                 export_path = os.path.join(image_dir, f"calib_{camera_model}_{camera_serial}.json")
